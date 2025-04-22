@@ -44,7 +44,7 @@ export default function Home() {
         {/* Code editor section */}
         <div className="flex-1 border-l border-border">
           <Editor
-            height="100vh"
+            height="100%"
             language={language}
             value={code}
             onChange={(value) => setCode(value || "")}

@@ -5,16 +5,12 @@ export const runtime = "nodejs";
 export const maxDuration = 5;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages, code, language } = await req.json();
 
   // System message to instruct the AI to generate code
   const systemMessage = {
     role: "system",
-    content: `You are a helpful coding assistant. When asked to generate code:
-    1. Provide clean, well-commented code
-    2. Wrap code blocks in triple backticks with the appropriate language identifier
-    3. Explain your code briefly
-    4. If asked to modify existing code, make the requested changes and explain what you did`,
+    content: `You are a coder ai you generate code in ${language} language in backticks with language identifier. When asked you have to edit the code and make chenges to users code:>> ${code} <<:`,
   };
 
   // Add system message to the beginning if it doesn't exist

@@ -3,20 +3,19 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useChat } from "@ai-sdk/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MemoizedMarkdown } from "@/components/memoized-markdown";
 
 const languageMap: Record<string, string> = {
   js: "javascript",
-  jsx: "javascript",
   ts: "typescript",
-  tsx: "typescript",
   py: "python",
   python: "python",
+  cpp: "cpp",
+  c: "c",
   html: "html",
-  css: "css",
-  json: "json",
 };
 
 interface ChatProps {
@@ -33,33 +32,42 @@ export default function Chat({
   language,
 }: ChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       api: "/api/chat",
+      body: {
+        code,
+        language,
+      },
       onFinish: (message) => {
+        const content = message.content;
+
+        // Extract code blocks
         const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-        let match;
-        let extractedCode = "";
-        let detectedLanguage = language;
-
-        while ((match = codeBlockRegex.exec(message.content)) !== null) {
-          if (match[1]) {
-            detectedLanguage =
-              languageMap[match[1].toLowerCase()] || match[1].toLowerCase();
-            setLanguage(detectedLanguage);
-          }
-          extractedCode = match[2];
-        }
-
-        if (extractedCode) {
-          setCode(extractedCode);
-        }
-
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        const match = codeBlockRegex.exec(content);
+        if (match !== null) {
+          setLanguage(languageMap[match[1].toLowerCase()]);
+          setCode(match[2]);
         }
       },
     });
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (scrollRef.current) {
+      const scrollContainer = scrollRef.current;
+      const shouldScroll =
+        scrollContainer.scrollHeight -
+          scrollContainer.scrollTop -
+          scrollContainer.clientHeight <
+        100;
+
+      if (shouldScroll) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [messages, isLoading]);
 
   // Function to remove code blocks from message content
   const removeCodeBlocks = (content: string) => {
@@ -86,17 +94,13 @@ export default function Chat({
                       ? "bg-blue-600 text-white px-4"
                       : "px-2 text-sm"
                   }`}>
-                  <div className="prose prose-sm">{cleanContent}</div>
+                  <MemoizedMarkdown content={cleanContent} id={message.id} />
                 </div>
               </div>
             );
           })}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-50 rounded-2xl px-4 py-3">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-              </div>
-            </div>
+            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
           )}
         </div>
       </ScrollArea>
