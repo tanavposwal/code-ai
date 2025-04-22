@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import Chat from "@/components/chat";
-import { Code2, MessageSquare } from "lucide-react";
+import { Code2, Loader2, MessageSquare } from "lucide-react";
 
 export default function Home() {
   const [code, setCode] = useState<string>("// Start coding here...");
   const [language, setLanguage] = useState("javascript");
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
@@ -26,7 +27,11 @@ export default function Home() {
             <option value="typescript">TypeScript</option>
             <option value="python">Python</option>
             <option value="html">HTML</option>
-            <option value="css">CSS</option>
+            <option value="cpp">C++</option>
+            <option value="c">C</option>
+            <option value="java">Java</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
           </select>
         </div>
       </nav>
@@ -39,10 +44,16 @@ export default function Home() {
           setCode={setCode}
           setLanguage={setLanguage}
           language={language}
+          setLoading={setLoading}
         />
 
         {/* Code editor section */}
-        <div className="flex-1 border-l border-border">
+        <div className="flex-1 border-l border-border relative">
+          {loading && (
+            <div className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center z-10 bg-accent/80 animate-pulse">
+              <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+            </div>
+          )}
           <Editor
             height="100%"
             language={language}
@@ -52,14 +63,11 @@ export default function Home() {
             options={{
               minimap: { enabled: false },
               fontSize: 14,
-              wordWrap: "on",
               automaticLayout: true,
-              padding: { top: 16, bottom: 16 },
               lineNumbers: "on",
               renderLineHighlight: "all",
               scrollBeyondLastLine: false,
               smoothScrolling: true,
-              cursorSmoothCaretAnimation: "on",
             }}
           />
         </div>

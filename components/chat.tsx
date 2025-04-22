@@ -15,7 +15,10 @@ const languageMap: Record<string, string> = {
   python: "python",
   cpp: "cpp",
   c: "c",
+  java: "java",
   html: "html",
+  go: "go",
+  rust: "rust",
 };
 
 interface ChatProps {
@@ -23,6 +26,7 @@ interface ChatProps {
   setCode: (code: string) => void;
   setLanguage: (language: string) => void;
   language: string;
+  setLoading: any;
 }
 
 export default function Chat({
@@ -30,6 +34,7 @@ export default function Chat({
   setCode,
   setLanguage,
   language,
+  setLoading,
 }: ChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +72,7 @@ export default function Chat({
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
+    setLoading(isLoading);
   }, [messages, isLoading]);
 
   // Function to remove code blocks from message content
@@ -94,7 +100,10 @@ export default function Chat({
                       ? "bg-blue-600 text-white px-4"
                       : "px-2 text-sm"
                   }`}>
-                  <MemoizedMarkdown content={cleanContent} id={message.id} />
+                  <MemoizedMarkdown
+                    content={cleanContent}
+                    id={Math.random().toString()}
+                  />
                 </div>
               </div>
             );
